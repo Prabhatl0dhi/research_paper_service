@@ -2,6 +2,8 @@
 //  admin.js — Admin Dashboard Logic
 //  Replace BACKEND_URL with your live Railway URL before deploy
 // ============================================================
+alert("Admin JS is loaded!");
+console.log("Checking for login function...");
 
 const BACKEND_URL = "researchpaperservice-production.up.railway.app";
 
