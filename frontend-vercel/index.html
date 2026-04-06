@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PaperFormat — Academic Formatting Service</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Syne', 'sans-serif'],
+            mono: ['DM Mono', 'monospace'],
+          },
+          colors: {
+            ink: '#0A0A0A',
+            paper: '#F5F5F0',
+            rule: '#D4D4CC',
+            blue: '#1A56FF',
+            'blue-dark': '#1040D0',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: #F5F5F0;
+      color: #0A0A0A;
+      font-family: 'Syne', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .border-ink { border-color: #0A0A0A; }
+    .border-rule { border-color: #D4D4CC; }
+
+    /* Top bar */
+    .topbar {
+      border-bottom: 1.5px solid #0A0A0A;
+    }
+
+    /* Input base */
+    .field-input {
+      width: 100%;
+      background: #fff;
+      border: 1.5px solid #0A0A0A;
+      padding: 0.75rem 1rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      color: #0A0A0A;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+      border-radius: 0;
+    }
+    .field-input:focus {
+      border-color: #1A56FF;
+      box-shadow: 0 0 0 2px rgba(26,86,255,0.15);
+    }
+    .field-input::placeholder { color: #9CA3AF; }
+
+    select.field-input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%230A0A0A' stroke-width='2' d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 2.5rem;
+      cursor: pointer;
+    }
+
+    /* File input */
+    .file-zone {
+      width: 100%;
+      border: 1.5px dashed #0A0A0A;
+      background: #fff;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+    .file-zone:hover, .file-zone.drag-over {
+      border-color: #1A56FF;
+      background: rgba(26,86,255,0.03);
+    }
+    .file-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Submit button */
+    .btn-primary {
+      background: #0A0A0A;
+      color: #F5F5F0;
+      border: 1.5px solid #0A0A0A;
+      padding: 0.875rem 2rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.15s, color 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #1A56FF;
+      border-color: #1A56FF;
+    }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Error state */
+    .field-error {
+      border-color: #CC2200 !important;
+    }
+    .error-msg {
+      color: #CC2200;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Label */
+    .field-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+      color: #0A0A0A;
+    }
+
+    /* Success block */
+    #success-block {
+      display: none;
+      border: 1.5px solid #0A0A0A;
+      border-left: 4px solid #1A56FF;
+      background: #fff;
+      padding: 2.5rem 2rem;
+    }
+
+    /* Divider rule */
+    .section-rule {
+      border: none;
+      border-top: 1.5px solid #D4D4CC;
+      margin: 2rem 0;
+    }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(245,245,240,0.4);
+      border-top-color: #F5F5F0;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Stat bar */
+    .stat-item {
+      border-left: 1.5px solid #D4D4CC;
+      padding: 0 2rem;
+    }
+    .stat-item:first-child { border-left: none; padding-left: 0; }
+
+    /* Accent text */
+    .accent { color: #1A56FF; }
+
+    /* Footnote rule */
+    footer {
+      border-top: 1.5px solid #D4D4CC;
+    }
+
+    @media (max-width: 640px) {
+      .stat-item { border-left: none; border-top: 1.5px solid #D4D4CC; padding: 1rem 0 0; margin-top: 1rem; }
+      .stat-item:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <header class="topbar px-6 py-4 flex items-center justify-between sticky top-0 bg-paper z-50">
+    <div class="flex items-center gap-3">
+      <div class="w-5 h-5 bg-ink" style="clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%)"></div>
+      <span class="font-mono text-sm font-medium tracking-widest uppercase">PaperFormat</span>
+    </div>
+    <div class="hidden md:flex items-center gap-6">
+      <span class="font-mono text-xs text-gray-400 tracking-widest">ACADEMIC FORMATTING SERVICE</span>
+      <div class="w-2 h-2 bg-blue rounded-full"></div>
+      <span class="font-mono text-xs tracking-widest text-blue font-medium">ACCEPTING ORDERS</span>
+    </div>
+  </header>
+
+  <main class="flex-1">
+
+    <section class="border-b border-ink px-6 py-16 md:py-24">
+      <div class="max-w-4xl mx-auto">
+        <div class="mb-6">
+          <span class="font-mono text-xs tracking-widest text-blue border border-blue px-2 py-1 uppercase">Research &amp; Academic</span>
+        </div>
+        <h1 class="text-4xl md:text-6xl font-extrabold leading-tight tracking-tight mb-6" style="font-family: 'Syne', sans-serif;">
+          Professional<br />
+          Academic Paper<br />
+          <span class="accent">Formatting.</span>
+        </h1>
+        <p class="text-base md:text-lg text-gray-600 max-w-xl leading-relaxed mb-10">
+          Submit your draft. Receive a publication-ready document formatted to exact journal or institutional standards. LaTeX, IEEE, APA, MLA, and custom styles.
+        </p>
+
+        <div class="flex flex-col sm:flex-row sm:items-start gap-0 sm:gap-0">
+          <div class="stat-item">
+            <div class="font-mono text-2xl font-medium">48h</div>
+            <div class="font-mono text-xs text-gray-400 uppercase tracking-widest mt-1">Avg. Turnaround</div>
+          </div>
+          <div class="stat-item">
+            <div class="font-mono text-2xl font-medium">LaTeX</div>
+            <div class="font-mono text-xs text-gray-400 uppercase tracking-widest mt-1">Primary Format</div>
+          </div>
+          <div class="stat-item">
+            <div class="font-mono text-2xl font-medium">WhatsApp</div>
+            <div class="font-mono text-xs text-gray-400 uppercase tracking-widest mt-1">Direct Contact</div>
+          </div>
+          <div class="stat-item">
+            <div class="font-mono text-2xl font-medium">100%</div>
+            <div class="font-mono text-xs text-gray-400 uppercase tracking-widest mt-1">Custom Work</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="px-6 py-14">
+      <div class="max-w-2xl mx-auto">
+
+        <div class="mb-10">
+          <div class="font-mono text-xs tracking-widest text-gray-400 uppercase mb-2">Step 01 / Submit Request</div>
+          <h2 class="text-2xl font-bold">Tell us about your paper</h2>
+          <p class="text-sm text-gray-500 mt-2">Fields marked with an asterisk are required. We will reach out on WhatsApp to confirm scope and pricing.</p>
+        </div>
+
+        <div id="success-block" role="alert">
+          <div class="font-mono text-xs text-blue uppercase tracking-widest mb-3">Request Received</div>
+          <p class="text-xl font-bold mb-3">We will contact you on WhatsApp shortly to confirm details.</p>
+          <p class="text-sm text-gray-500">Your request has been logged. Expect a message within a few hours. Please keep your phone available.</p>
+          <hr class="section-rule" />
+          <p class="font-mono text-xs text-gray-400">Order ID will be shared via WhatsApp upon confirmation.</p>
+        </div>
+
+        <form id="order-form" novalidate>
+
+          <div class="mb-2">
+            <div class="font-mono text-xs tracking-widest text-gray-400 uppercase border-b border-rule pb-2 mb-6">Required Information</div>
+          </div>
+
+          <div class="mb-5">
+            <label class="field-label" for="fullName">Full Name <span class="text-blue">*</span></label>
+            <input type="text" id="fullName" name="fullName" class="field-input" placeholder="Dr. Priya Sharma" autocomplete="name" />
+            <div class="error-msg" id="err-fullName"></div>
+          </div>
+
+          <div class="mb-5">
+            <label class="field-label" for="phone">Phone / WhatsApp Number <span class="text-blue">*</span></label>
+            <input type="tel" id="phone" name="phone" class="field-input" placeholder="+91 98765 43210" autocomplete="tel" />
+            <div class="error-msg" id="err-phone"></div>
+          </div>
+
+          <div class="mb-5">
+            <label class="field-label" for="topic">Topic of the Paper <span class="text-blue">*</span></label>
+            <input type="text" id="topic" name="topic" class="field-input" placeholder="e.g., Deep Learning for Medical Image Segmentation" />
+            <div class="error-msg" id="err-topic"></div>
+          </div>
+
+          <hr class="section-rule" />
+
+          <div class="mb-6">
+            <button type="button" id="toggle-details-btn" class="w-full flex items-center justify-between border-b border-rule pb-2 text-left cursor-pointer transition-colors hover:border-ink group">
+              <div>
+                <span class="font-mono text-xs tracking-widest text-gray-400 uppercase transition-colors group-hover:text-ink">Additional Details</span>
+                <span class="font-mono text-xs tracking-widest text-blue ml-2 uppercase bg-blue/10 px-2 py-0.5">Optional</span>
+              </div>
+              <span id="toggle-icon" class="font-mono text-xl text-gray-400 transition-colors group-hover:text-ink leading-none">+</span>
+            </button>
+          </div>
+
+          <div id="optional-section" class="hidden pb-4">
+            
+            <div class="mb-5 mt-4">
+              <label class="field-label" for="formattingType">Formatting Type</label>
+              <select id="formattingType" name="formattingType" class="field-input">
+                <option value="">Select a format...</option>
+                <option value="Standard LaTeX">Standard LaTeX</option>
+                <option value="LaTeX + Custom Diagrams">LaTeX + Custom Diagrams</option>
+                <option value="IEEE Style">IEEE Style</option>
+                <option value="APA 7th Edition">APA 7th Edition</option>
+                <option value="MLA 9th Edition">MLA 9th Edition</option>
+                <option value="Chicago / Turabian">Chicago / Turabian</option>
+                <option value="Custom Journal Template">Custom Journal Template</option>
+                <option value="Other / Discuss">Other / Discuss</option>
+              </select>
+            </div>
+
+            <div class="mb-5">
+              <label class="field-label" for="draftFile">Upload Rough Draft / Sample Paper</label>
+              <div class="file-zone" id="file-zone">
+                <input type="file" id="draftFile" name="draftFile" accept=".pdf,.docx,.txt" />
+                <div class="pointer-events-none text-center">
+                  <div class="font-mono text-xs text-gray-400 uppercase tracking-widest mb-1" id="file-label">Drop file here or click to browse</div>
+                  <div class="font-mono text-xs text-gray-400">.pdf, .docx, .txt accepted</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-8">
+              <label class="field-label" for="instructions">Additional Instructions / Custom Details</label>
+              <textarea id="instructions" name="instructions" rows="4" class="field-input resize-none" placeholder="e.g., Needs Harvard citation style, 3 custom graphs, journal name is IEEE TPAMI..."></textarea>
+            </div>
+
+          </div>
+
+          <button type="submit" class="btn-primary" id="submit-btn">
+            <span id="btn-text">Submit Formatting Request</span>
+          </button>
+
+          <p class="font-mono text-xs text-gray-400 mt-4 text-center">
+            We respond via WhatsApp. No spam. No account required.
+          </p>
+
+        </form>
+
+      </div>
+    </section>
+
+    <section class="border-t border-rule bg-white px-6 py-14">
+      <div class="max-w-4xl mx-auto">
+        <div class="font-mono text-xs tracking-widest text-gray-400 uppercase mb-8">How It Works</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-0">
+          <div class="border border-rule p-6 md:border-r-0">
+            <div class="font-mono text-3xl font-medium text-blue mb-4">01</div>
+            <div class="font-bold text-base mb-2">Submit Your Request</div>
+            <div class="text-sm text-gray-500 leading-relaxed">Fill out the form with your paper details and any optional attachments. Takes under 2 minutes.</div>
+          </div>
+          <div class="border border-rule p-6 md:border-r-0 border-t-0 md:border-t">
+            <div class="font-mono text-3xl font-medium text-blue mb-4">02</div>
+            <div class="font-bold text-base mb-2">WhatsApp Confirmation</div>
+            <div class="text-sm text-gray-500 leading-relaxed">We review your requirements and message you directly on WhatsApp to confirm scope, timeline, and pricing.</div>
+          </div>
+          <div class="border border-rule p-6 border-t-0 md:border-t">
+            <div class="font-mono text-3xl font-medium text-blue mb-4">03</div>
+            <div class="font-bold text-base mb-2">Receive Formatted Paper</div>
+            <div class="text-sm text-gray-500 leading-relaxed">Your fully formatted, publication-ready document is delivered on time, directly to you.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="px-6 py-6">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <span class="font-mono text-xs text-gray-400">PaperFormat &mdash; Academic Formatting Service</span>
+      <span class="font-mono text-xs text-gray-400 tracking-widest">ALL WORK HANDLED MANUALLY. NO AUTOMATION.</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

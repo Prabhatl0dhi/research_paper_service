@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — PaperFormat Orders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Syne', 'sans-serif'],
+            mono: ['DM Mono', 'monospace'],
+          },
+          colors: {
+            ink: '#0A0A0A',
+            paper: '#F5F5F0',
+            rule: '#D4D4CC',
+            blue: '#1A56FF',
+            'blue-dark': '#1040D0',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      background: #F5F5F0;
+      color: #0A0A0A;
+      font-family: 'Syne', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Login overlay */
+    #login-overlay {
+      position: fixed;
+      inset: 0;
+      background: #F5F5F0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .login-box {
+      border: 1.5px solid #0A0A0A;
+      background: #fff;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .field-input {
+      width: 100%;
+      background: #fff;
+      border: 1.5px solid #0A0A0A;
+      padding: 0.75rem 1rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      color: #0A0A0A;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      border-radius: 0;
+    }
+    .field-input:focus {
+      border-color: #1A56FF;
+      box-shadow: 0 0 0 2px rgba(26,86,255,0.15);
+    }
+    .field-input::placeholder { color: #9CA3AF; }
+
+    .btn-primary {
+      background: #0A0A0A;
+      color: #F5F5F0;
+      border: 1.5px solid #0A0A0A;
+      padding: 0.75rem 1.5rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.15s;
+      border-radius: 0;
+    }
+    .btn-primary:hover { background: #1A56FF; border-color: #1A56FF; }
+
+    .topbar { border-bottom: 1.5px solid #0A0A0A; }
+
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table thead th {
+      background: #0A0A0A;
+      color: #F5F5F0;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .data-table tbody tr {
+      border-bottom: 1px solid #D4D4CC;
+      background: #fff;
+      transition: background 0.1s;
+    }
+    .data-table tbody tr:hover { background: #F9F9F6; }
+    .data-table td {
+      padding: 0.85rem 1rem;
+      font-size: 0.875rem;
+      vertical-align: top;
+    }
+
+    /* Status badge */
+    .badge {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.55rem;
+      border: 1.5px solid;
+    }
+    .badge-pending { color: #B45309; border-color: #B45309; background: rgba(180,83,9,0.06); }
+    .badge-completed { color: #166534; border-color: #166534; background: rgba(22,101,52,0.06); }
+
+    /* Action button */
+    .btn-action {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.75rem;
+      border: 1.5px solid #0A0A0A;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+      border-radius: 0;
+    }
+    .btn-action:hover { background: #0A0A0A; color: #F5F5F0; }
+    .btn-action.complete { border-color: #166534; color: #166534; }
+    .btn-action.complete:hover { background: #166534; color: #fff; }
+    .btn-action.pending { border-color: #B45309; color: #B45309; }
+    .btn-action.pending:hover { background: #B45309; color: #fff; }
+
+    .field-label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .error-login { color: #CC2200; font-family: 'DM Mono', monospace; font-size: 0.75rem; margin-top: 0.5rem; }
+
+    #admin-panel { display: none; }
+
+    /* Stats bar */
+    .stat-card {
+      border: 1.5px solid #D4D4CC;
+      background: #fff;
+      padding: 1rem 1.25rem;
+    }
+
+    /* Scrollable table wrapper */
+    .table-wrapper { overflow-x: auto; }
+
+    footer { border-top: 1.5px solid #D4D4CC; }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(245,245,240,0.4);
+      border-top-color: #F5F5F0;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.4rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-row td { text-align: center; padding: 3rem; font-family: 'DM Mono', monospace; font-size: 0.8rem; color: #9CA3AF; letter-spacing: 0.05em; }
+    .empty-row td { text-align: center; padding: 3rem; font-family: 'DM Mono', monospace; font-size: 0.8rem; color: #9CA3AF; }
+
+    .id-cell { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: #6B7280; }
+    .link-blue { color: #1A56FF; text-decoration: underline; text-underline-offset: 2px; font-size: 0.85rem; }
+    .topic-cell { max-width: 200px; }
+    .instructions-cell { max-width: 180px; font-size: 0.8rem; color: #6B7280; white-space: pre-line; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Login Overlay -->
+  <div id="login-overlay">
+    <div class="login-box">
+      <div class="flex items-center gap-2 mb-8">
+        <div class="w-4 h-4 bg-ink" style="clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%)"></div>
+        <span class="font-mono text-xs tracking-widest uppercase">PaperFormat / Admin</span>
+      </div>
+      <h1 class="text-xl font-bold mb-1">Restricted Access</h1>
+      <p class="text-sm text-gray-500 mb-7">Enter admin credentials to continue.</p>
+      <div class="mb-4">
+        <label class="field-label" for="admin-user">Username</label>
+        <input type="text" id="admin-user" class="field-input" placeholder="admin" autocomplete="username" />
+      </div>
+      <div class="mb-5">
+        <label class="field-label" for="admin-pass">Password</label>
+        <input type="password" id="admin-pass" class="field-input" placeholder="••••••••" autocomplete="current-password" />
+        <div class="error-login" id="login-error"></div>
+      </div>
+      <button class="btn-primary" id="login-btn" onclick="doLogin()">Access Dashboard</button>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="admin-panel" class="flex flex-col min-h-screen">
+
+    <!-- Top Bar -->
+    <header class="topbar px-6 py-4 flex items-center justify-between sticky top-0 bg-paper z-40">
+      <div class="flex items-center gap-3">
+        <div class="w-5 h-5 bg-ink" style="clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%)"></div>
+        <span class="font-mono text-sm font-medium tracking-widest uppercase">PaperFormat</span>
+        <span class="font-mono text-xs text-blue border border-blue px-2 py-0.5 ml-2">ADMIN</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <button onclick="loadOrders()" class="font-mono text-xs tracking-widest uppercase border border-rule px-3 py-1.5 bg-white hover:bg-paper transition-colors">Refresh</button>
+        <button onclick="doLogout()" class="font-mono text-xs tracking-widest uppercase border border-ink px-3 py-1.5 hover:bg-ink hover:text-paper transition-colors">Logout</button>
+      </div>
+    </header>
+
+    <main class="flex-1 px-6 py-10">
+      <div class="max-w-7xl mx-auto">
+
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+          <div>
+            <div class="font-mono text-xs tracking-widest text-gray-400 uppercase mb-2">Dashboard</div>
+            <h2 class="text-2xl font-bold">Order Requests</h2>
+          </div>
+          <div class="font-mono text-xs text-gray-400" id="last-refresh">Last refreshed: --</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8" id="stats-bar">
+          <div class="stat-card">
+            <div class="font-mono text-2xl font-medium" id="stat-total">--</div>
+            <div class="font-mono text-xs text-gray-400 uppercase tracking-widest mt-1">Total Orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="font-mono text-2xl font-medium text-amber-700" id="stat-pending">--</div>
+            <div class="font-mono text-xs text-gray-400 uppercase tracking-widest mt-1">Pending</div>
+          </div>
+          <div class="stat-card">
+            <div class="font-mono text-2xl font-medium text-green-800" id="stat-completed">--</div>
+            <div class="font-mono text-xs text-gray-400 uppercase tracking-widest mt-1">Completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="font-mono text-2xl font-medium text-blue" id="stat-files">--</div>
+            <div class="font-mono text-xs text-gray-400 uppercase tracking-widest mt-1">With Files</div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="border border-ink">
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Submitted</th>
+                  <th>Name</th>
+                  <th>WhatsApp</th>
+                  <th>Topic</th>
+                  <th>Format</th>
+                  <th>File</th>
+                  <th>Instructions</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody">
+                <tr class="loading-row"><td colspan="10">LOADING ORDERS...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <footer class="px-6 py-5">
+      <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <span class="font-mono text-xs text-gray-400">PaperFormat Admin Console</span>
+        <span class="font-mono text-xs text-gray-400">Session active</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
