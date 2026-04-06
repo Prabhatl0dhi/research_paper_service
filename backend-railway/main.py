@@ -255,3 +255,28 @@ async def get_order(order_id: int, _: None = Depends(verify_basic_auth)):
     if isinstance(d.get("created_at"), datetime):
         d["created_at"] = d["created_at"].isoformat()
     return d
+
+
+@app.delete("/orders/{order_id}", tags=["Orders"])
+async def delete_order(order_id: int, _: None = Depends(verify_basic_auth)):
+    """
+    Delete an order by ID. Requires Basic Auth.
+    """
+    # Check if order exists
+    select_query = orders_table.select().where(orders_table.c.id == order_id)
+    order = await database.fetch_one(select_query)
+    
+    if not order:
+        raise HTTPException(status_code=404, detail=f"Order #{order_id} not found.")
+
+    # Optional: Delete the physical file from /uploads if it exists
+    if order["file_url"]:
+        file_path = UPLOAD_DIR / Path(order["file_url"]).name
+        if file_path.exists():
+            file_path.unlink()
+
+    # Delete from DB
+    delete_query = orders_table.delete().where(orders_table.c.id == order_id)
+    await database.execute(delete_query)
+
+    return {"id": order_id, "message": "Order and associated files deleted."}
