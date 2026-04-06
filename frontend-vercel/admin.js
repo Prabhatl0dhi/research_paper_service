@@ -3,7 +3,7 @@
 //  Replace BACKEND_URL with your live Railway URL before deploy
 // ============================================================
 
-const BACKEND_URL = "https://YOUR-RAILWAY-APP.railway.app";
+const BACKEND_URL = "researchpaperservice-production.up.railway.app";
 
 // ---- Hardcoded admin credentials (client-side only guard) ----
 // For production, move auth to the backend with JWT or session tokens.
